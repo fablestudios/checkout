@@ -19,15 +19,19 @@ export async function prepareExistingDirectory(
   // Indicates whether to delete the directory contents
   let remove = false
 
+  const tryGetFetch = await git?.tryGetFetchUrl()
   // Check whether using git or REST API
   if (!git) {
+    core.info('25 !git')
     remove = true
   }
   // Fetch URL does not match
   else if (
     !fsHelper.directoryExistsSync(path.join(repositoryPath, '.git')) ||
-    repositoryUrl !== (await git.tryGetFetchUrl())
+    repositoryUrl !== tryGetFetch
   ) {
+    //const u = await git.tryGetFetchUrl()
+    core.info(`34 !fsHelper || ${repositoryUrl} !== ${tryGetFetch}`)
     remove = true
   } else {
     // Delete any index.lock and shallow.lock left by a previously canceled run or crashed git process
@@ -85,11 +89,12 @@ export async function prepareExistingDirectory(
       if (clean) {
         core.startGroup('Cleaning the repository')
         if (!(await git.tryClean())) {
-          core.debug(
-            `The clean command failed. This might be caused by: 1) path too long, 2) permission issue, or 3) file in use. For futher investigation, manually run 'git clean -ffdx' on the directory '${repositoryPath}'.`
+          core.info(
+            `93 The clean command failed. This might be caused by: 1) path too long, 2) permission issue, or 3) file in use. For futher investigation, manually run 'git clean -ffdx' on the directory '${repositoryPath}'.`
           )
           remove = true
         } else if (!(await git.tryReset())) {
+          core.info('97: !tryReset')
           remove = true
         }
         core.endGroup()
@@ -107,7 +112,6 @@ export async function prepareExistingDirectory(
       remove = true
     }
   }
-
   if (remove) {
     // Delete the contents of the directory. Don't delete the directory itself
     // since it might be the current working directory.

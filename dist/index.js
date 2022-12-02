@@ -9303,11 +9303,14 @@ function prepareExistingDirectory(git, repositoryPath, repositoryUrl, clean, ref
         let remove = false;
         // Check whether using git or REST API
         if (!git) {
+            core.info('25 !git');
             remove = true;
         }
         // Fetch URL does not match
         else if (!fsHelper.directoryExistsSync(path.join(repositoryPath, '.git')) ||
             repositoryUrl !== (yield git.tryGetFetchUrl())) {
+            //const u = await git.tryGetFetchUrl()
+            core.info(`34 !fsHelper || ${repositoryUrl} !== u`);
             remove = true;
         }
         else {
@@ -9359,10 +9362,11 @@ function prepareExistingDirectory(git, repositoryPath, repositoryUrl, clean, ref
                 if (clean) {
                     core.startGroup('Cleaning the repository');
                     if (!(yield git.tryClean())) {
-                        core.debug(`The clean command failed. This might be caused by: 1) path too long, 2) permission issue, or 3) file in use. For futher investigation, manually run 'git clean -ffdx' on the directory '${repositoryPath}'.`);
+                        core.info(`93 The clean command failed. This might be caused by: 1) path too long, 2) permission issue, or 3) file in use. For futher investigation, manually run 'git clean -ffdx' on the directory '${repositoryPath}'.`);
                         remove = true;
                     }
                     else if (!(yield git.tryReset())) {
+                        core.info('97: !tryReset');
                         remove = true;
                     }
                     core.endGroup();
